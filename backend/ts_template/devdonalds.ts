@@ -58,7 +58,7 @@ const parse_handwriting = (recipeName: string): string | null => {
 // [TASK 2] ====================================================================
 // Endpoint that adds a CookbookEntry to your magical cookbook
 app.post("/entry", (req:Request, res:Response) => {
-  const entry : any = req.body.entry;
+  const entry : any = req.body;
   // check if name already exists
   const isNameExist = cookbook.some(e => e.name === entry.name);
   if (isNameExist) {

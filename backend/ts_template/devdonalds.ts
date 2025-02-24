@@ -89,10 +89,49 @@ app.post("/entry", (req:Request, res:Response) => {
 // [TASK 3] ====================================================================
 // Endpoint that returns a summary of a recipe that corresponds to a query name
 app.get("/summary", (req:Request, res:Request) => {
-  // TODO: implement me
-  res.status(500).send("not yet implemented!")
-
+  const recipeName = parse_handwriting(req.query.name);
+  const recipe = cookbook.find(e => e.name === recipeName);
+  if (!recipe || recipe.type !== 'recipe') {
+    return res.status(400).json('Given recipe name is not a valid recipe.');
+  } 
+  try {
+    const summary = findAllIngredients(recipe.name);
+    console.log(summary)
+    res.status(200).send(summary)
+  } catch (e) {
+    res.status(400).send(e)
+  }
 });
+
+const findAllIngredients = (name: string) => {
+  const recipe = cookbook.find(e => e.name === name);
+  const recipes = [[recipe, 1]];
+  const ingredients = [];
+  let cookTime = 0;  
+  while (recipes.length > 0) {
+    const recipe = recipes.pop();
+    for (const ri of recipe[0].requiredItems) {
+      const item = cookbook.find(e => e.name === ri.name);
+      if (!item) {
+        throw new Error('invalid item')
+      }
+      if (item.type === 'ingredient') {
+        cookTime += item.cookTime * ri.quantity * recipe[1];
+        ingredients.push({
+          name: ri.name,
+          quantity: ri.quantity * recipe[1],
+        })
+      } else if (item.type === 'recipe') {
+        recipes.push([item, ri.quantity])
+      }
+    }
+  }
+  return {
+    name,
+    cookTime,
+    requiredItems: ingredients
+  }
+}
 
 // =============================================================================
 // ==== DO NOT TOUCH ===========================================================

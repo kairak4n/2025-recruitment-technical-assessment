@@ -83,7 +83,7 @@ app.post("/entry", (req:Request, res:Response) => {
   } else {
     return res.status(400).json('Your entry type is cooked.')
   } 
-  res.send('')
+  res.send({})
 });
 
 // [TASK 3] ====================================================================
@@ -96,7 +96,6 @@ app.get("/summary", (req:Request, res:Request) => {
   } 
   try {
     const summary = findAllIngredients(recipe.name);
-    console.log(summary)
     res.status(200).send(summary)
   } catch (e) {
     res.status(400).send(e)

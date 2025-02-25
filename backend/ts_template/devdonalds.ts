@@ -46,13 +46,16 @@ app.post("/parse", (req:Request, res:Response) => {
 // Takes in a recipeName and returns it in a form that 
 const parse_handwriting = (recipeName: string): string | null => {
   recipeName = recipeName.replace(/[-_]/g," ");
+  // remove any character other than a letter and a whitespace
   recipeName = recipeName.replace(/[^a-zA-Z ]/g, "");
   recipeName = recipeName.toLowerCase();
   let words = recipeName.trim().split(/\s+/g);
+  // capitalise the first letters of each word
   words = words
     .map(word => word.charAt(0).toUpperCase() + word.slice(1,))
   recipeName = words.join(" ")
-  return recipeName ? recipeName : null;
+  // return recipeName if recipeName is not an empty string, else return null
+  return recipeName === "" ? recipeName : null;
 }
 
 // [TASK 2] ====================================================================
@@ -104,23 +107,26 @@ app.get("/summary", (req:Request, res:Request) => {
 
 const findAllIngredients = (name: string) => {
   const recipe = cookbook.find(e => e.name === name);
+  // last-in first-out array to process each recipe
   const recipes = [[recipe, 1]];
   const ingredients = [];
   let cookTime = 0;  
   while (recipes.length > 0) {
-    const recipe = recipes.pop();
-    for (const ri of recipe[0].requiredItems) {
+    const processed = recipes.pop();
+    // loop through each requiredItem in current recipe that is being processed
+    for (const ri of processed[0].requiredItems) {
       const item = cookbook.find(e => e.name === ri.name);
       if (!item) {
         throw new Error('invalid item')
       }
       if (item.type === 'ingredient') {
-        cookTime += item.cookTime * ri.quantity * recipe[1];
+        cookTime += item.cookTime * ri.quantity * processed[1];
         ingredients.push({
           name: ri.name,
-          quantity: ri.quantity * recipe[1],
+          quantity: ri.quantity * processed[1],
         })
       } else if (item.type === 'recipe') {
+        // push item to recipes array to process
         recipes.push([item, ri.quantity])
       }
     }

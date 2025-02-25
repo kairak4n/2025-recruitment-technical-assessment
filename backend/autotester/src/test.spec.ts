@@ -157,5 +157,87 @@ describe("Task 3", () => {
       const resp3 = await getTask3("Skibidi");
       expect(resp3.status).toBe(200);
     });
+
+    // commented out because posting ingredients twice throws an error
+    // it.only("Nested recipe", async () => {
+    //   const spaghetti = {
+    //     type: "recipe",
+    //     name: "Spaghetti",
+    //     requiredItems: [
+    //       {
+    //         "name": "Meatball",
+    //         "quantity": 3
+    //       },
+    //       {
+    //         "name": "Pasta",
+    //         "quantity": 1
+    //       },
+    //       {
+    //         "name": "Tomato",
+    //         "quantity": 2
+    //       }
+    //     ]
+    //   };
+    //   const meatball = {
+    //     type: "recipe",
+    //     name: "Meatball",
+    //     requiredItems: [
+    //       {
+    //         name: "Beef",
+    //         quantity: 2
+    //       },
+    //       {
+    //         name: "Egg",
+    //         quantity: 1
+    //       }
+    //     ]
+    //   };
+    //   const pasta = {
+    //     type: "recipe",
+    //     name: "Pasta",
+    //     requiredItems: [
+    //       {
+    //         name: "Flour",
+    //         quantity: 3
+    //       },
+    //       {
+    //         name: "Egg",
+    //         quantity: 1
+    //       }
+    //     ]
+    //   };
+      
+    //   const beef = {
+    //     type: "ingredient",
+    //     name: "Beef",
+    //     cookTime: 5
+    //   }
+
+    //   const egg = {
+    //     type: "ingredient",
+    //     name: "Egg",
+    //     cookTime: 3,
+    //   };
+
+    //   const flour = {
+    //     type: "ingredient",
+    //     name: "Flour",
+    //     cookTime: 0
+    //   };
+
+    //   const tomato = {
+    //     type: "ingredient",
+    //     name: "Tomato",
+    //     cookTime: 2,
+    //   }
+
+    //   const entries = [tomato, flour, egg, beef, pasta, meatball, spaghetti]
+    //   for (const entry of entries) {
+    //     const res = await postEntry(entry);
+    //     expect(res.status).toBe(200);
+    //   }
+    //   const summaryRes = await getTask3("Spaghetti");
+    //   expect(summaryRes.status).toBe(200);
+    // })
   });
 });

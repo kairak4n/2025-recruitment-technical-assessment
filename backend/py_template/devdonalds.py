@@ -28,7 +28,7 @@ class Ingredient(CookbookEntry):
 app = Flask(__name__)
 
 # Store your recipes here!
-cookbook = None
+cookbook = []
 
 # Task 1 helper (don't touch)
 @app.route("/parse", methods=['POST'])
@@ -43,16 +43,40 @@ def parse():
 # [TASK 1] ====================================================================
 # Takes in a recipeName and returns it in a form that 
 def parse_handwriting(recipeName: str) -> Union[str | None]:
-	# TODO: implement me
-	return recipeName
-
+	recipeName = re.sub(r'[-_]', ' ', recipeName)
+	recipeName = re.sub(r'[^a-zA-Z ]', "", recipeName)
+	recipeName = recipeName.lower()
+	recipeName = recipeName.strip()
+	words = re.split('\s+', recipeName)
+	words = list(map(lambda w: w.title(), words))
+	recipeName = " ".join(words)
+	return recipeName if recipeName else None
 
 # [TASK 2] ====================================================================
 # Endpoint that adds a CookbookEntry to your magical cookbook
 @app.route('/entry', methods=['POST'])
 def create_entry():
-	# TODO: implement me
-	return 'not implemented', 500
+	entry = request.get_json()
+	# check if name already exists
+	isNameExist = any(e['name'] == entry['name'] for e in cookbook)
+	if isNameExist:
+		return 'Entry already logged into the cookbook', 400
+	
+	if entry['type'] == 'recipe':
+		# check if requiredItems names are unique
+		itemNames = set()
+		for item in entry['requiredItems']:
+			if item['name'] in itemNames:
+				return 'Recipe requiredItems can only have one element per name', 400
+			itemNames.add(item['name'])
+		cookbook.append(entry)
+	elif entry['type'] == 'ingredient':
+		if entry['cookTime'] < 0:
+			return 'cookTime is invalid', 400
+		cookbook.append(entry)
+	else:
+		return 'Your entry type is cooked', 400
+	return {}, 200
 
 
 # [TASK 3] ====================================================================

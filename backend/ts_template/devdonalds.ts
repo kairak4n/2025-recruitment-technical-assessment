@@ -55,7 +55,7 @@ const parse_handwriting = (recipeName: string): string | null => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1,))
   recipeName = words.join(" ")
   // return recipeName if recipeName is not an empty string, else return null
-  return recipeName === "" ? recipeName : null;
+  return recipeName !== "" ? recipeName : null;
 }
 
 // [TASK 2] ====================================================================

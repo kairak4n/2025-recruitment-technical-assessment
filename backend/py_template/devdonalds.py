@@ -76,16 +76,54 @@ def create_entry():
 		cookbook.append(entry)
 	else:
 		return 'Your entry type is cooked', 400
-	return {}, 200
+	return jsonify({}), 200
 
 
 # [TASK 3] ====================================================================
 # Endpoint that returns a summary of a recipe that corresponds to a query name
 @app.route('/summary', methods=['GET'])
 def summary():
-	# TODO: implement me
-	return 'not implemented', 500
+	recipeName = parse_handwriting(request.args.get('name'))
+	recipe = None
+	for r in cookbook:
+		if r['name'] == recipeName:
+			recipe = r
+	if not recipe or recipe['type'] != 'recipe':
+		return 'Given recipe name is not a valid recipe', 400
+	try:
+		summary = findAllIngredients(recipe['name'])
+		return summary, 200
+	except ValueError:
+		return 'invalid item', 400
 
+def findAllIngredients(name: str):
+	recipe = None
+	for r in cookbook:
+		if r['name'] == name:
+			recipe = r
+	recipes = [(recipe, 1)]
+	ingredients = []
+	cookTime = 0
+	while len(recipes) > 0:
+		removed = recipes.pop()
+		for ri in removed[0]['requiredItems']:
+			item = next((e for e in cookbook if e["name"] == ri["name"]), None)
+			if not item:
+				raise ValueError('invalid item')
+			if item['type'] == 'ingredient':
+				cookTime += item['cookTime'] * ri['quantity'] * removed[1]
+				ingredients.append({
+					'name': ri['name'],
+					'quantity': ri['quantity'] * removed[1],
+				})
+			elif item['type'] == 'recipe':
+				recipes.append([item, ri['quantity']])
+
+	return {
+		'name': name,
+		'cookTime': cookTime,
+		'requiredItems': ingredients,
+	}
 
 # =============================================================================
 # ==== DO NOT TOUCH ===========================================================

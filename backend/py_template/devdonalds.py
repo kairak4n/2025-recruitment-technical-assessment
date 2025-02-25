@@ -44,10 +44,12 @@ def parse():
 # Takes in a recipeName and returns it in a form that 
 def parse_handwriting(recipeName: str) -> Union[str | None]:
 	recipeName = re.sub(r'[-_]', ' ', recipeName)
+	# remove any non-letter and non-whitespace character
 	recipeName = re.sub(r'[^a-zA-Z ]', "", recipeName)
 	recipeName = recipeName.lower()
 	recipeName = recipeName.strip()
 	words = re.split('\s+', recipeName)
+	# capitalise words' first letters
 	words = list(map(lambda w: w.title(), words))
 	recipeName = " ".join(words)
 	return recipeName if recipeName else None
@@ -84,10 +86,7 @@ def create_entry():
 @app.route('/summary', methods=['GET'])
 def summary():
 	recipeName = parse_handwriting(request.args.get('name'))
-	recipe = None
-	for r in cookbook:
-		if r['name'] == recipeName:
-			recipe = r
+	recipe = next((e for e in cookbook if e['name'] == recipeName), None)
 	if not recipe or recipe['type'] != 'recipe':
 		return 'Given recipe name is not a valid recipe', 400
 	try:
@@ -97,24 +96,23 @@ def summary():
 		return 'invalid item', 400
 
 def findAllIngredients(name: str):
-	recipe = None
-	for r in cookbook:
-		if r['name'] == name:
-			recipe = r
+	recipe = next((r for r in cookbook if r['name'] == name), None)
+	# last-in first-out array to process each recipe
 	recipes = [(recipe, 1)]
 	ingredients = []
 	cookTime = 0
 	while len(recipes) > 0:
-		removed = recipes.pop()
-		for ri in removed[0]['requiredItems']:
+		processed = recipes.pop()
+		# loop through each requiredItem in current recipe that is being processed
+		for ri in processed[0]['requiredItems']:
 			item = next((e for e in cookbook if e["name"] == ri["name"]), None)
 			if not item:
 				raise ValueError('invalid item')
 			if item['type'] == 'ingredient':
-				cookTime += item['cookTime'] * ri['quantity'] * removed[1]
+				cookTime += item['cookTime'] * ri['quantity'] * processed[1]
 				ingredients.append({
 					'name': ri['name'],
-					'quantity': ri['quantity'] * removed[1],
+					'quantity': ri['quantity'] * processed[1],
 				})
 			elif item['type'] == 'recipe':
 				recipes.append([item, ri['quantity']])
